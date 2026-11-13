@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+# Prepared configuration only. Creating a service requires separate approval.
+services:
+  - type: web
+    name: numerical-methods-euler-heun-ode
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m backend.serve
+    healthCheckPath: /health
+    autoDeployTrigger: 'off'
