@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Laboratorio de ecuaciones diferenciales: Euler, Heun y solución exacta con desarrollo paso a paso.">
+  <title>Laboratorio EDO · Sesión 14</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+<aside class="sidebar">
+  <a class="brand" href="#inicio"><span class="brand-icon">∂</span><span>MÉTODOS<br><b>Laboratorio numérico</b></span></a>
+  <div class="course-label">UNIDAD 03 / ANÁLISIS NUMÉRICO</div>
+  <nav aria-label="Secciones del laboratorio">
+    <a href="#problema"><span>01</span> Problema y parámetros</a>
+    <a href="#resultados"><span>02</span> Resultados</a>
+    <a href="#visualizacion"><span>03</span> Visualización</a>
+    <a href="#desarrollo"><span>04</span> Desarrollo paso a paso</a>
+    <a href="#fundamento"><span>05</span> Fundamento matemático</a>
+  </nav>
+  <div class="side-note"><span class="small-label">SESIÓN 14</span><p>De una pendiente<br>a una trayectoria.</p><small>Ingeniería de Sistemas<br>Universidad Peruana Unión</small></div>
+</aside>
+<main id="contenido">
+  <header id="inicio" class="topbar"><span>Laboratorio / Ecuaciones diferenciales</span><span class="status-dot">PVI de primer orden</span></header>
+  <section class="hero">
+    <div><p class="eyebrow">EXPLORA · CALCULA · COMPARA</p><h1>Una ecuación.<br><span>Dos aproximaciones.</span></h1><p class="hero-copy">Resuelve el problema de valor inicial con Euler y Heun. <br>Observa cada paso y contrasta el resultado con la solución exacta.</p><div class="tags"><span>Euler · orden 1</span><span>Heun · orden 2</span><span>Paso fijo</span></div></div>
+    <div class="hero-equation" aria-label="Ecuación diferencial"><span>EL PROBLEMA DE HOY</span><p>(y² − x²) dx + xy dy = 0</p><div>y(1) = 2 <i>→</i> y(1.2) = ?</div><small>Dos pasos para entender la diferencia.</small></div>
+  </section>
+  <section id="problema" class="panel parameter-panel">
+    <div class="section-heading"><div><p class="eyebrow">01 / CONFIGURACIÓN</p><h2>Tu punto de partida</h2></div><span id="case-badge" class="badge">Ejercicio oficial</span></div>
+    <div class="equation-strip"><strong>y′ = f(x, y) = x/y − y/x</strong><span>Dominio: x ≠ 0, y ≠ 0</span></div>
+    <form id="parameters">
+      <div class="input-grid">
+        <label>x inicial <span>x₀</span><input name="x0" type="number" step="any" required value="{{ defaults.x0 }}"></label>
+        <label>y inicial <span>y₀</span><input name="y0" type="number" step="any" required value="{{ defaults.y0 }}"></label>
+        <label>x objetivo <span>x final</span><input name="x_final" type="number" step="any" required value="{{ defaults.x_final }}"></label>
+        <label>Tamaño de paso <span>h</span><input name="h" type="number" step="any" required value="{{ defaults.h }}"></label>
+      </div>
+      <div class="form-footer"><p>Integración hacia adelante · hasta 10 000 pasos.<br>El intervalo debe ser un múltiplo entero de h.</p><div class="actions"><button type="button" id="restore" class="secondary">Restaurar ejercicio</button><button type="submit" id="calculate" class="primary">Calcular métodos <span aria-hidden="true">↗</span></button></div></div>
+    </form>
+    <p id="error" class="error" role="alert" hidden></p>
+    <p id="loading" class="loading" role="status" hidden>Calculando las trayectorias…</p>
+  </section>
+  <div id="output" hidden>
+    <section id="resultados" aria-labelledby="results-title">
+      <div class="section-heading"><div><p class="eyebrow">02 / RESULTADOS</p><h2 id="results-title">La precisión, en números</h2><p id="run-summary" class="muted"></p></div><button id="copy" class="secondary">Copiar cálculos</button></div>
+      <p id="stale" class="notice" hidden>Has cambiado los parámetros. Calcula de nuevo para actualizar estos resultados.</p>
+      <p id="copy-status" role="status" class="muted"></p>
+      <div class="result-grid">
+        <article class="result-card exact"><p><span class="dot exact-dot"></span> SOLUCIÓN EXACTA</p><strong id="exact-value"></strong><small>Referencia analítica del PVI</small><div id="constant-value"></div></article>
+        <article class="result-card euler"><p><span class="dot euler-dot"></span> MÉTODO DE EULER</p><strong id="euler-value"></strong><small>Una pendiente por paso</small><div>Error relativo <b id="euler-error"></b></div></article>
+        <article class="result-card heun"><p><span class="dot heun-dot"></span> EULER MEJORADO · HEUN</p><strong id="heun-value"></strong><small>Predicción + corrección</small><div>Error relativo <b id="heun-error"></b></div></article>
+      </div>
+      <div class="conclusion"><span aria-hidden="true">◎</span><p id="conclusion"></p></div>
+    </section>
+    <section id="visualizacion" class="panel">
+      <div class="section-heading"><div><p class="eyebrow">03 / VISUALIZACIÓN</p><h2>Tres caminos, un mismo PVI</h2></div><span class="badge">Canvas / escala automática</span></div>
+      <div class="chart-controls" aria-label="Series visibles">
+        <label><input type="checkbox" data-series="exacta" checked><span class="dot exact-dot"></span> Solución exacta</label>
+        <label><input type="checkbox" data-series="euler" checked><span class="dot euler-dot"></span> Euler</label>
+        <label><input type="checkbox" data-series="heun" checked><span class="dot heun-dot"></span> Heun</label>
+      </div>
+      <div class="chart-wrap"><canvas id="chart" role="img" aria-label="Comparación de las trayectorias exacta, Euler y Heun. Los valores numéricos están disponibles en las tablas siguientes."></canvas></div>
+      <p id="chart-readout" class="chart-readout">Mueve el cursor sobre la gráfica para consultar los nodos.</p>
+      <p class="muted chart-note">Las líneas de Euler y Heun unen los nodos calculados. Oculta series con la leyenda. Consulta también los nodos con el selector de iteraciones.</p>
+    </section>
+    <section id="desarrollo">
+      <div class="section-heading"><div><p class="eyebrow">04 / PROCEDIMIENTO</p><h2>Sin saltarse ningún paso</h2></div><label class="step-label">Iteración <select id="step-select" aria-label="Iteración a desarrollar"></select></label></div>
+      <div class="method-grid"><article class="panel method euler-method"><h3><span class="dot euler-dot"></span> Euler</h3><p class="formula">yᵢ₊₁ = yᵢ + h f(xᵢ, yᵢ)</p><div id="euler-detail" class="steps"></div></article><article class="panel method heun-method"><h3><span class="dot heun-dot"></span> Heun</h3><p class="formula">yᵢ₊₁ = yᵢ + ½h (k₁ + k₂)</p><div id="heun-detail" class="steps"></div></article></div>
+      <article class="panel table-panel"><h3>Registro de Euler</h3><p class="muted">Pendiente, incremento y nuevo punto en cada iteración.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Tabla de Euler"><table id="euler-table"><caption class="sr-only">Iteraciones de Euler</caption><thead><tr><th>Paso</th><th>xᵢ</th><th>yᵢ</th><th>h</th><th>f(xᵢ,yᵢ)</th><th>h · f</th><th>xᵢ₊₁</th><th>yᵢ₊₁</th></tr></thead><tbody></tbody></table></div><div id="euler-pagination" class="pagination"></div></article>
+      <article class="panel table-panel"><h3>Registro de Heun</h3><p class="muted">Dos pendientes y una corrección por paso.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Tabla de Heun"><table id="heun-table"><caption class="sr-only">Iteraciones de Heun</caption><thead><tr><th>Paso</th><th>xᵢ</th><th>yᵢ</th><th>h</th><th>k₁</th><th>Predictor zᵢ₊₁</th><th>k₂</th><th>Incremento</th><th>xᵢ₊₁</th><th>Corrector yᵢ₊₁</th></tr></thead><tbody></tbody></table></div><div id="heun-pagination" class="pagination"></div></article>
+      <article class="panel"><h3>Comparación de errores</h3><div class="table-scroll"><table><caption class="sr-only">Errores respecto a la solución exacta</caption><thead><tr><th>Método</th><th>Error absoluto</th><th>Error relativo (%)</th></tr></thead><tbody id="error-table"></tbody></table></div><div class="error-formulas"><span>Eₐ = |y exacta − y aproximada|</span><span>Eᵣ (%) = Eₐ / |y exacta| × 100</span></div></article>
+    </section>
+  </div>
+  <section id="fundamento" class="panel foundation"><p class="eyebrow">05 / FUNDAMENTO MATEMÁTICO</p><h2>¿De dónde sale el valor verdadero?</h2><div class="foundation-grid"><div><p>Partimos de xy y′ = x² − y². Con <b>u = y²</b>, se obtiene una ecuación lineal:</p><p class="formula">u′ + (2/x)u = 2x</p><p>El factor integrante x² permite integrar:</p><p class="formula">(x²u)′ = 2x³ → y² = x²/2 + C/x²</p></div><div><p>La condición inicial determina la constante:</p><p class="formula">C = x₀²y₀² − x₀⁴/2</p><p>Se elige la rama con el signo de y₀, en un intervalo donde x e y no se anulan. Para el ejercicio oficial:</p><p class="formula">y(x) = √(x²/2 + 7/(2x²))</p></div></div><div class="precision-note"><b>Precisión y alcance.</b> Los cálculos conservan la precisión de coma flotante. Solo se redondea su presentación; al copiar se incluyen los valores completos. Heun es de orden global 2 y Euler de orden 1, pero la comparación mostrada corresponde exclusivamente al PVI y al paso elegidos.</div></section>
+  <footer><span>MÉTODOS / Laboratorio de ecuaciones diferenciales</span><span>UPeU · Ingeniería de Sistemas · Sesión 14</span></footer>
+</main>
+</body>
+</html>
